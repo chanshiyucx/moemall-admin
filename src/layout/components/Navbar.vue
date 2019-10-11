@@ -120,6 +120,7 @@ export default {
       .avatar-wrapper {
         margin-top: 5px;
         position: relative;
+        transform: translateY(-2px);
 
         .user-avatar {
           cursor: pointer;

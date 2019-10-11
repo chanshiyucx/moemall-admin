@@ -1,23 +1,24 @@
-import { login, logout, getInfo } from '@/api/user'
+import { login, logout } from '@/api/user'
+import { localSave, localRead } from '@/utils'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import { resetRouter } from '@/router'
 
+const localUser = localRead('userInfo')
+
 const state = {
   token: getToken(),
-  name: '',
-  avatar: '',
+  userInfo: localUser ? JSON.parse(localUser) : {},
   routes: [] // 全部路由
 }
 
 const mutations = {
   SET_TOKEN: (state, token) => {
     state.token = token
+    setToken(token)
   },
-  SET_NAME: (state, name) => {
-    state.name = name
-  },
-  SET_AVATAR: (state, avatar) => {
-    state.avatar = avatar
+  SET_USER: (state, userInfo) => {
+    state.userInfo = userInfo
+    localSave('userInfo', JSON.stringify(userInfo))
   },
   SET_ROUTES: (state, routes) => {
     state.routes = routes
@@ -32,32 +33,9 @@ const actions = {
       login({ username: username.trim(), password: password })
         .then(response => {
           const { data } = response
+          commit('SET_USER', data)
           commit('SET_TOKEN', data.token)
-          setToken(data.token)
           resolve()
-        })
-        .catch(error => {
-          reject(error)
-        })
-    })
-  },
-
-  // get user info
-  getInfo({ commit, state }) {
-    return new Promise((resolve, reject) => {
-      getInfo(state.token)
-        .then(response => {
-          const { data } = response
-
-          if (!data) {
-            reject('Verification failed, please Login again.')
-          }
-
-          const { name, avatar } = data
-
-          commit('SET_NAME', name)
-          commit('SET_AVATAR', avatar)
-          resolve(data)
         })
         .catch(error => {
           reject(error)
@@ -68,16 +46,11 @@ const actions = {
   // user logout
   logout({ commit, state }) {
     return new Promise((resolve, reject) => {
-      logout(state.token)
-        .then(() => {
-          commit('SET_TOKEN', '')
-          removeToken()
-          resetRouter()
-          resolve()
-        })
-        .catch(error => {
-          reject(error)
-        })
+      commit('SET_USER', {})
+      commit('SET_TOKEN', '')
+      removeToken()
+      resetRouter()
+      resolve()
     })
   },
 
