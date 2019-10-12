@@ -19,13 +19,13 @@ export default {
 
 <style scoped>
 .app-main {
-  /*50 = navbar  */
-  min-height: calc(100vh - 50px);
+  /*50 = navbar  34 = tag */
+  height: calc(100vh - 84px);
   width: 100%;
   position: relative;
-  overflow: hidden;
+  overflow: auto;
 }
-.fixed-header+.app-main {
+.fixed-header + .app-main {
   padding-top: 50px;
 }
 </style>

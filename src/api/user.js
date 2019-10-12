@@ -7,10 +7,3 @@ export function login(data) {
     data
   })
 }
-
-export function logout() {
-  return request({
-    url: '/admin/logout',
-    method: 'post'
-  })
-}
