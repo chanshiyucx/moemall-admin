@@ -5,7 +5,7 @@
     </div>
 
     <el-table v-loading="loading.table" :data="list" row-key="id" :tree-props="{children: 'children'}" :row-class-name="tableRowClassName" border fit>
-      <el-table-column prop="id" label="ID" align="left" sortable width="120" />
+      <el-table-column prop="id" label="ID" align="left" sortable width="150" />
       <el-table-column prop="name" label="名称" align="center" sortable min-width="100">
         <template slot-scope="scope">
           <el-link :type="tableRowType(scope.row)" @click="handleDialog(scope.row)">{{ scope.row.name }}</el-link>
@@ -14,12 +14,13 @@
       <el-table-column prop="value" label="权限值" align="center" sortable min-width="150" />
       <el-table-column label="状态" align="center" sortable min-width="100">
         <template slot-scope="scope">
-          <el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">{{ scope.row.status === 1 ? '启用' : '禁用' }}</el-tag>
+          <el-tag :type="scope.row.status === 1 ? 'success' : 'warning'">{{ scope.row.status === 1 ? '启用' : '禁用' }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="createTime" label="创建时间" align="center" sortable min-width="150" />
       <el-table-column label="操作" align="center" min-width="200px">
         <template slot-scope="scope">
+          <el-button :type="scope.row.status === 1 ? 'warning' : 'success'" size="mini" @click="handleStatus(scope.row)">{{ scope.row.status === 1 ? '禁用' : '启用' }}</el-button>
           <el-button type="danger" size="mini" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
@@ -132,6 +133,29 @@ export default {
         }
         this.loading.dataForm = false
       })
+    },
+    handleStatus(row) {
+      this.$confirm(`确定${row.status === 1 ? '禁用' : '启用'}该权限?`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(async() => {
+          this.loading.table = true
+          try {
+            const req = { ...row }
+            req.status = row.status === 1 ? 0 : 1
+            const res = await updatePermission(req)
+            this.$message.success(res.message || 'OK')
+            this.getData()
+          } catch (error) {
+            console.log(error)
+          }
+          this.loading.table = false
+        })
+        .catch(() => {
+          console.log('关闭弹窗')
+        })
     },
     handleDelete(row) {
       if (row.children.length) {
