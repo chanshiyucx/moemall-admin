@@ -1,10 +1,14 @@
 <template>
   <div class="app-container">
+    <div class="filter-container">
+      <el-button type="primary" size="medium" icon="el-icon-plus" @click="handleDialog()">新增权限</el-button>
+    </div>
+
     <el-table v-loading="loading.table" :data="list" row-key="id" :tree-props="{children: 'children'}" :row-class-name="tableRowClassName" border fit>
       <el-table-column prop="id" label="ID" align="left" sortable width="120" />
       <el-table-column prop="name" label="名称" align="center" sortable min-width="100">
         <template slot-scope="scope">
-          <el-link :type="tableRowType(scope.row)" @click="handleDialog(scope.row, 'update')">{{ scope.row.name }}</el-link>
+          <el-link :type="tableRowType(scope.row)" @click="handleDialog(scope.row)">{{ scope.row.name }}</el-link>
         </template>
       </el-table-column>
       <el-table-column prop="value" label="权限值" align="center" sortable min-width="150" />
@@ -16,14 +20,16 @@
       <el-table-column prop="createTime" label="创建时间" align="center" sortable min-width="150" />
       <el-table-column label="操作" align="center" min-width="200px">
         <template slot-scope="scope">
-          <el-button size="mini" type="primary" @click="handleDialog(scope.row, 'create')">新增</el-button>
-          <el-button v-if="scope.row.value" size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button>
+          <el-button type="danger" size="mini" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <el-dialog :title="`${type === 'create' ? '新增' : '编辑'}权限`" :visible.sync="visible.dataForm" :close-on-click-modal="false">
       <el-form ref="dataForm" :rules="rules" :model="dataForm" label-position="left" label-width="80px" style="width: 400px; margin-left:20px;">
+        <el-form-item v-if="type === 'create'" label="父权限">
+          <el-cascader v-model="dataForm.pid" style="width: 320px;" :options="list" :props="{ checkStrictly: true, emitPath: false, label: 'name', value: 'id' }" clearable placeholder="父权限，默认为根权限" />
+        </el-form-item>
         <el-form-item label="名称" prop="name">
           <el-input v-model="dataForm.name" />
         </el-form-item>
@@ -47,7 +53,7 @@
 import { listPermission, createPermission, updatePermission, deletePermission } from '@/api/permission'
 
 const initDataForm = {
-  pid: '',
+  pid: 0,
   name: '',
   value: '',
   status: true
@@ -89,13 +95,14 @@ export default {
       }
       this.loading.table = false
     },
-    handleDialog(row, type) {
-      this.type = type
-      if (type === 'create') {
-        this.dataForm = { ...initDataForm, pid: row.id }
-      } else {
+    handleDialog(row) {
+      if (row) {
         this.dataForm = { ...row }
         this.dataForm.status = row.status === 1
+        this.type = 'edit'
+      } else {
+        this.dataForm = { ...initDataForm }
+        this.type = 'create'
       }
       this.loading.dataForm = false
       this.visible.dataForm = true
@@ -110,6 +117,7 @@ export default {
         try {
           const req = { ...this.dataForm }
           req.status = req.status ? 1 : 0
+          req.pid = req.pid || 0
           let res
           if (this.type === 'create') {
             res = await createPermission(req)
@@ -170,6 +178,10 @@ export default {
 </script>
 
 <style lang="scss" scope>
+.filter-container {
+  margin-bottom: 10px;
+}
+
 .el-table {
   .first-row {
     background: #f0f9eb;
