@@ -28,7 +28,7 @@
 
     <el-dialog :title="`${type === 'create' ? '新增' : '编辑'}权限`" :visible.sync="visible.dataForm" :close-on-click-modal="false">
       <el-form ref="dataForm" :rules="rules" :model="dataForm" label-position="left" label-width="80px" style="width: 400px; margin-left:20px;">
-        <el-form-item v-if="type === 'create'" label="父权限">
+        <el-form-item v-if="type === 'create' && visible.dataForm" label="父权限">
           <el-cascader v-model="dataForm.pid" style="width: 320px;" :options="list" :props="{ checkStrictly: true, emitPath: false, label: 'name', value: 'id' }" clearable placeholder="父权限，默认为根权限" />
         </el-form-item>
         <el-form-item label="名称" prop="name">
