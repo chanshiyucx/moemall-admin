@@ -12,7 +12,7 @@
         </template>
       </el-table-column>
       <el-table-column prop="description" label="描述" align="center" sortable min-width="150" />
-      <el-table-column prop="adminCount" label="用户数量" align="center" sortable min-width="150" />
+      <el-table-column prop="adminCount" label="用户数量" align="center" sortable min-width="100" />
       <el-table-column label="状态" align="center" sortable min-width="100">
         <template slot-scope="scope">
           <el-tag :type="scope.row.status === 1 ? 'success' : 'warning'">{{ scope.row.status === 1 ? '启用' : '禁用' }}</el-tag>
@@ -60,7 +60,6 @@ const initDataForm = {
   description: '',
   status: true,
   permissionIds: []
-
 }
 
 export default {

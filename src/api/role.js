@@ -3,14 +3,14 @@ import request from '@/utils/request'
 export function listRole() {
   return request({
     url: '/role/list',
-    method: 'get'
+    method: 'GET'
   })
 }
 
 export function createRole(data) {
   return request({
     url: '/role/create',
-    method: 'post',
+    method: 'POST',
     data
   })
 }
@@ -18,7 +18,7 @@ export function createRole(data) {
 export function updateRole(data) {
   return request({
     url: '/role/update',
-    method: 'put',
+    method: 'PUT',
     data
   })
 }
@@ -26,6 +26,6 @@ export function updateRole(data) {
 export function deleteRole(id) {
   return request({
     url: `/role/delete/${id}`,
-    method: 'delete'
+    method: 'DELETE'
   })
 }

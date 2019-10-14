@@ -3,14 +3,14 @@ import request from '@/utils/request'
 export function listPermission() {
   return request({
     url: '/permission/treeList',
-    method: 'get'
+    method: 'GET'
   })
 }
 
 export function createPermission(data) {
   return request({
     url: '/permission/create',
-    method: 'post',
+    method: 'POST',
     data
   })
 }
@@ -18,7 +18,7 @@ export function createPermission(data) {
 export function updatePermission(data) {
   return request({
     url: '/permission/update',
-    method: 'put',
+    method: 'PUT',
     data
   })
 }
@@ -26,6 +26,6 @@ export function updatePermission(data) {
 export function deletePermission(id) {
   return request({
     url: `/permission/delete/${id}`,
-    method: 'delete'
+    method: 'DELETE'
   })
 }
