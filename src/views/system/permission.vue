@@ -26,16 +26,16 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog :title="`${type === 'create' ? '新增' : '编辑'}权限`" :visible.sync="visible.dataForm" :close-on-click-modal="false">
+    <el-dialog :title="`${type === 'create' ? '新增' : '编辑'}权限`" :visible.sync="visible.dataForm" :close-on-click-modal="false" width="500px">
       <el-form ref="dataForm" :rules="rules" :model="dataForm" label-position="left" label-width="80px" style="width: 400px; margin-left:20px;">
         <el-form-item v-if="type === 'create' && visible.dataForm" label="父权限">
           <el-cascader v-model="dataForm.pid" style="width: 320px;" :options="list" :props="{ checkStrictly: true, emitPath: false, label: 'name', value: 'id' }" clearable placeholder="父权限，默认为根权限" />
         </el-form-item>
         <el-form-item label="名称" prop="name">
-          <el-input v-model="dataForm.name" />
+          <el-input v-model="dataForm.name" placeholder="请输入权限名称" />
         </el-form-item>
         <el-form-item label="权限值">
-          <el-input v-model="dataForm.value" />
+          <el-input v-model="dataForm.value" placeholder="请输入权限值" />
         </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-switch v-model="dataForm.status" active-text="启用" inactive-text="禁用" />
@@ -76,9 +76,9 @@ export default {
       type: 'create',
       dataForm: { ...initDataForm },
       rules: {
-        name: [{ required: true, message: '请输入名称', trigger: 'change' }],
+        name: [{ required: true, message: '请输入权限名称', trigger: 'change' }],
         value: [{ required: true, message: '请输入权限值', trigger: 'change' }],
-        status: [{ required: true, message: '请选择状态', trigger: 'change' }]
+        status: [{ required: true, message: '请选择权限状态', trigger: 'change' }]
       }
     }
   },
