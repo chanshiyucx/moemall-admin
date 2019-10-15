@@ -21,14 +21,30 @@
       <el-table-column prop="createTime" label="创建时间" align="center" sortable min-width="150" />
       <el-table-column label="操作" align="center" min-width="200px">
         <template slot-scope="scope">
-          <el-button :type="scope.row.status === 1 ? 'warning' : 'success'" size="mini" @click="handleStatus(scope.row)">{{ scope.row.status === 1 ? '禁用' : '启用' }}</el-button>
+          <el-button
+            :type="scope.row.status === 1 ? 'warning' : 'success'"
+            size="mini"
+            @click="handleStatus(scope.row)"
+          >{{ scope.row.status === 1 ? '禁用' : '启用' }}</el-button>
           <el-button type="danger" size="mini" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <el-dialog :title="`${type === 'create' ? '新增' : '编辑'}角色`" :visible.sync="visible.dataForm" :close-on-click-modal="false" width="500px">
-      <el-form ref="dataForm" :rules="rules" :model="dataForm" label-position="left" label-width="80px" style="width: 400px; margin-left:20px;">
+    <el-dialog
+      :title="`${type === 'create' ? '新增' : '编辑'}角色`"
+      :visible.sync="visible.dataForm"
+      :close-on-click-modal="false"
+      width="500px"
+    >
+      <el-form
+        ref="dataForm"
+        :rules="rules"
+        :model="dataForm"
+        label-position="left"
+        label-width="80px"
+        style="width: 400px; margin-left:20px;"
+      >
         <el-form-item label="名称" prop="name">
           <el-input v-model="dataForm.name" placeholder="请输入角色名称" />
         </el-form-item>
@@ -39,7 +55,18 @@
           <el-switch v-model="dataForm.status" active-text="启用" inactive-text="禁用" />
         </el-form-item>
         <el-form-item v-if="visible.dataForm" label="权限">
-          <el-tree ref="tree" :data="permissionList" :default-checked-keys="checked" :check-strictly="true" show-checkbox default-expand-all node-key="id" highlight-current :props="defaultProps" @check="handleCheckChange" />
+          <el-tree
+            ref="tree"
+            :data="permissionList"
+            :default-checked-keys="checked"
+            :check-strictly="true"
+            :props="defaultProps"
+            show-checkbox
+            default-expand-all
+            node-key="id"
+            highlight-current
+            @check="handleCheckChange"
+          />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -47,7 +74,6 @@
         <el-button type="primary" :loading="loading.dataForm" @click="handleSure">确认</el-button>
       </div>
     </el-dialog>
-
   </div>
 </template>
 

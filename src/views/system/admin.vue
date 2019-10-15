@@ -8,7 +8,7 @@
       <el-table-column prop="id" label="ID" align="center" sortable width="100" />
       <el-table-column label="头像" align="center" sortable min-width="100">
         <template slot-scope="scope">
-          <img class="thumb" :src="scope.row.avatar" alt="" @click="handleDialog(scope.row)">
+          <img class="thumb" :src="scope.row.avatar" alt @click="handleDialog(scope.row)" >
         </template>
       </el-table-column>
       <el-table-column prop="username" label="用户名" align="center" sortable min-width="100" />
@@ -17,7 +17,12 @@
       <el-table-column prop="note" label="备注" align="center" sortable min-width="150" />
       <el-table-column label="角色" align="center" sortable min-width="100">
         <template slot-scope="scope">
-          <el-tag v-for="item in scope.row.roleIds" :key="item" style="margin-bottom: 4px;" type="success">{{ getAdminRole(item) }}</el-tag>
+          <el-tag
+            v-for="item in scope.row.roleIds"
+            :key="item"
+            style="margin-bottom: 4px;"
+            type="success"
+          >{{ getAdminRole(item) }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="状态" align="center" sortable min-width="100">
@@ -28,16 +33,38 @@
       <el-table-column prop="createTime" label="创建时间" align="center" sortable min-width="150" />
       <el-table-column label="操作" align="center" min-width="200px">
         <template slot-scope="scope">
-          <el-button :type="scope.row.status === 1 ? 'warning' : 'success'" size="mini" @click="handleStatus(scope.row)">{{ scope.row.status === 1 ? '禁用' : '启用' }}</el-button>
+          <el-button
+            :type="scope.row.status === 1 ? 'warning' : 'success'"
+            size="mini"
+            @click="handleStatus(scope.row)"
+          >{{ scope.row.status === 1 ? '禁用' : '启用' }}</el-button>
           <el-button type="danger" size="mini" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total > 0" :total="total" :page.sync="query.pageNum" :limit.sync="query.pageSize" @pagination="getData()" />
+    <pagination
+      v-show="total > 0"
+      :total="total"
+      :page.sync="query.pageNum"
+      :limit.sync="query.pageSize"
+      @pagination="getData()"
+    />
 
-    <el-dialog :title="`${type === 'create' ? '新增' : '编辑'}账号`" :visible.sync="visible.dataForm" :close-on-click-modal="false" width="500px">
-      <el-form ref="dataForm" :rules="rules" :model="dataForm" label-position="left" label-width="80px" style="width: 400px; margin-left:20px;">
+    <el-dialog
+      :title="`${type === 'create' ? '新增' : '编辑'}账号`"
+      :visible.sync="visible.dataForm"
+      :close-on-click-modal="false"
+      width="500px"
+    >
+      <el-form
+        ref="dataForm"
+        :rules="rules"
+        :model="dataForm"
+        label-position="left"
+        label-width="80px"
+        style="width: 400px; margin-left:20px;"
+      >
         <el-form-item label="用户名" prop="username">
           <el-input v-model="dataForm.username" placeholder="请输入用户名" />
         </el-form-item>
@@ -64,13 +91,21 @@
         <el-form-item label="备注">
           <el-input v-model="dataForm.note" placeholder="请输入备注" />
         </el-form-item>
+        <el-form-item label="头像">
+          <Upload
+            :loading="loading.upload"
+            :preview="dataForm.avatar"
+            @beforeUpload="beforeUpload"
+            @handleSuccess="handleSuccess"
+            @handleError="handleError"
+          />
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="visible.dataForm = false">取消</el-button>
         <el-button type="primary" :loading="loading.dataForm" @click="handleSure">确认</el-button>
       </div>
     </el-dialog>
-
   </div>
 </template>
 
@@ -78,6 +113,7 @@
 import { listAdmin, createAdmin, updateAdmin, deleteAdmin } from '@/api/admin'
 import { listRole } from '@/api/role'
 import Pagination from '@/components/Pagination'
+import Upload from '@/components/Upload'
 
 const initDataForm = {
   username: '',
@@ -93,12 +129,13 @@ const initDataForm = {
 
 export default {
   name: 'Admin',
-  components: { Pagination },
+  components: { Pagination, Upload },
   data() {
     return {
       loading: {
         table: false,
-        dataForm: false
+        dataForm: false,
+        upload: false
       },
       visible: {
         dataForm: false
@@ -235,6 +272,25 @@ export default {
         .catch(() => {
           console.log('关闭弹窗')
         })
+    },
+    beforeUpload() {
+      this.loading.upload = true
+    },
+    handleSuccess(res, file, fileList) {
+      if (res.status !== 200) {
+        return this.$message.error('图片上传失败')
+      }
+      this.dataForm.avatar = res.data
+
+      const img = new Image()
+      img.onload = () => {
+        this.loading.upload = false
+      }
+      img.src = res.data
+    },
+    handleError(err) {
+      this.$message.error('图片上传失败:' + err.message)
+      this.loading.upload = false
     },
     getAdminRole(role) {
       if (!role) return '-'

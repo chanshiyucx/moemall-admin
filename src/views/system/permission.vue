@@ -4,7 +4,15 @@
       <el-button type="primary" size="medium" icon="el-icon-plus" @click="handleDialog()">新增权限</el-button>
     </div>
 
-    <el-table v-loading="loading.table" :data="list" row-key="id" :tree-props="{children: 'children'}" :row-class-name="tableRowClassName" border fit>
+    <el-table
+      v-loading="loading.table"
+      :data="list"
+      row-key="id"
+      :tree-props="{children: 'children'}"
+      :row-class-name="tableRowClassName"
+      border
+      fit
+    >
       <el-table-column prop="id" label="ID" align="left" sortable width="150" />
       <el-table-column prop="name" label="名称" align="center" sortable min-width="100">
         <template slot-scope="scope">
@@ -20,16 +28,39 @@
       <el-table-column prop="createTime" label="创建时间" align="center" sortable min-width="150" />
       <el-table-column label="操作" align="center" min-width="200px">
         <template slot-scope="scope">
-          <el-button :type="scope.row.status === 1 ? 'warning' : 'success'" size="mini" @click="handleStatus(scope.row)">{{ scope.row.status === 1 ? '禁用' : '启用' }}</el-button>
+          <el-button
+            :type="scope.row.status === 1 ? 'warning' : 'success'"
+            size="mini"
+            @click="handleStatus(scope.row)"
+          >{{ scope.row.status === 1 ? '禁用' : '启用' }}</el-button>
           <el-button type="danger" size="mini" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <el-dialog :title="`${type === 'create' ? '新增' : '编辑'}权限`" :visible.sync="visible.dataForm" :close-on-click-modal="false" width="500px">
-      <el-form ref="dataForm" :rules="rules" :model="dataForm" label-position="left" label-width="80px" style="width: 400px; margin-left:20px;">
+    <el-dialog
+      :title="`${type === 'create' ? '新增' : '编辑'}权限`"
+      :visible.sync="visible.dataForm"
+      :close-on-click-modal="false"
+      width="500px"
+    >
+      <el-form
+        ref="dataForm"
+        :rules="rules"
+        :model="dataForm"
+        label-position="left"
+        label-width="80px"
+        style="width: 400px; margin-left:20px;"
+      >
         <el-form-item v-if="type === 'create' && visible.dataForm" label="父权限">
-          <el-cascader v-model="dataForm.pid" style="width: 320px;" :options="list" :props="{ checkStrictly: true, emitPath: false, label: 'name', value: 'id' }" clearable placeholder="父权限，默认为根权限" />
+          <el-cascader
+            v-model="dataForm.pid"
+            style="width: 320px;"
+            :options="list"
+            :props="{ checkStrictly: true, emitPath: false, label: 'name', value: 'id' }"
+            clearable
+            placeholder="父权限，默认为根权限"
+          />
         </el-form-item>
         <el-form-item label="名称" prop="name">
           <el-input v-model="dataForm.name" placeholder="请输入权限名称" />
@@ -46,7 +77,6 @@
         <el-button type="primary" :loading="loading.dataForm" @click="handleSure">确认</el-button>
       </div>
     </el-dialog>
-
   </div>
 </template>
 

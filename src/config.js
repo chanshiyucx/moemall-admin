@@ -6,5 +6,5 @@ if (!isDev) {
 }
 
 export default {
-  baseURL: 'http://192.168.10.242:8090'
+  baseURL: 'http://192.168.205.1:8090'
 }
