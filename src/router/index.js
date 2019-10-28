@@ -57,28 +57,48 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/system',
+    path: '/ums',
     component: Layout,
-    name: 'System',
-    meta: { title: '系统管理', icon: 'system' },
+    name: 'Ums',
+    meta: { title: '系统管理', icon: 'ums' },
     children: [
       {
         path: 'permission',
         name: 'Permission',
-        component: () => import('@/views/system/permission'),
-        meta: { title: '权限管理', icon: 'permission' }
+        component: () => import('@/views/ums/permission'),
+        meta: { title: '权限管理', icon: 'permission', id: 28 }
       },
       {
         path: 'role',
         name: 'Role',
-        component: () => import('@/views/system/role'),
-        meta: { title: '角色管理', icon: 'role' }
+        component: () => import('@/views/ums/role'),
+        meta: { title: '角色管理', icon: 'role', id: 24 }
       },
       {
         path: 'admin',
         name: 'Admin',
-        component: () => import('@/views/system/admin'),
-        meta: { title: '账户管理', icon: 'admin' }
+        component: () => import('@/views/ums/admin'),
+        meta: { title: '账户管理', icon: 'admin', id: 20 }
+      }
+    ]
+  },
+  {
+    path: '/pms',
+    component: Layout,
+    name: 'Pms',
+    meta: { title: '商品管理', icon: 'ums' },
+    children: [
+      {
+        path: 'category',
+        name: 'Category',
+        component: () => import('@/views/pms/category'),
+        meta: { title: '分类管理', icon: 'category', id: 4 }
+      },
+      {
+        path: 'brand',
+        name: 'Brand',
+        component: () => import('@/views/pms/brand'),
+        meta: { title: '品牌管理', icon: 'brand', id: 6 }
       }
     ]
   },

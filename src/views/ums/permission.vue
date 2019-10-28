@@ -1,24 +1,31 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-button type="primary" size="medium" icon="el-icon-plus" @click="handleDialog()">新增角色</el-button>
+      <el-button type="primary" icon="el-icon-plus" @click="handleDialog()">新增权限</el-button>
     </div>
 
-    <el-table v-loading="loading.table" :data="list" border fit>
-      <el-table-column prop="id" label="ID" align="center" sortable width="100" />
-      <el-table-column prop="name" label="名称" align="center" sortable min-width="100">
+    <el-table
+      v-loading="loading.table"
+      :data="list"
+      row-key="id"
+      :tree-props="{children: 'children'}"
+      :row-class-name="tableRowClassName"
+      border
+      fit
+    >
+      <el-table-column prop="id" label="ID" align="left" width="150" />
+      <el-table-column prop="name" label="名称" align="center" min-width="100">
         <template slot-scope="scope">
-          <el-link type="primary" @click="handleDialog(scope.row)">{{ scope.row.name }}</el-link>
+          <el-link :type="tableRowType(scope.row)" @click="handleDialog(scope.row)">{{ scope.row.name }}</el-link>
         </template>
       </el-table-column>
-      <el-table-column prop="description" label="描述" align="center" sortable min-width="150" />
-      <el-table-column prop="adminCount" label="用户数量" align="center" sortable min-width="100" />
-      <el-table-column label="状态" align="center" sortable min-width="100">
+      <el-table-column prop="value" label="权限值" align="center" min-width="150" />
+      <el-table-column label="状态" align="center" min-width="100">
         <template slot-scope="scope">
           <el-tag :type="scope.row.status === 1 ? 'success' : 'warning'">{{ scope.row.status === 1 ? '启用' : '禁用' }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="createTime" label="创建时间" align="center" sortable min-width="150" />
+      <el-table-column prop="createTime" label="创建时间" align="center" min-width="150" />
       <el-table-column label="操作" align="center" min-width="200px">
         <template slot-scope="scope">
           <el-button
@@ -32,7 +39,7 @@
     </el-table>
 
     <el-dialog
-      :title="`${type === 'create' ? '新增' : '编辑'}角色`"
+      :title="`${type === 'create' ? '新增' : '编辑'}权限`"
       :visible.sync="visible.dataForm"
       :close-on-click-modal="false"
       width="500px"
@@ -45,27 +52,29 @@
         label-width="80px"
         style="width: 400px; margin-left:20px;"
       >
-        <el-form-item label="名称" prop="name">
-          <el-input v-model="dataForm.name" placeholder="请输入角色名称" />
+        <el-form-item v-if="type === 'create' && visible.dataForm" label="父权限">
+          <el-cascader
+            v-model="dataForm.pid"
+            style="width: 320px;"
+            :options="list"
+            :props="{ checkStrictly: true, emitPath: false, label: 'name', value: 'id' }"
+            clearable
+            placeholder="父权限，默认为根权限"
+          />
         </el-form-item>
-        <el-form-item label="描述" prop="description">
-          <el-input v-model="dataForm.description" placeholder="请输入角色描述" />
+        <el-form-item label="名称" prop="name">
+          <el-input v-model="dataForm.name" placeholder="请输入权限名称" />
+        </el-form-item>
+        <el-form-item label="权限值">
+          <el-input v-model="dataForm.value" placeholder="请输入权限值" />
         </el-form-item>
         <el-form-item label="状态" prop="status">
-          <el-switch v-model="dataForm.status" active-text="启用" inactive-text="禁用" />
-        </el-form-item>
-        <el-form-item v-if="visible.dataForm" label="权限">
-          <el-tree
-            ref="tree"
-            :data="permissionList"
-            :default-checked-keys="checked"
-            :check-strictly="true"
-            :props="defaultProps"
-            show-checkbox
-            default-expand-all
-            node-key="id"
-            highlight-current
-            @check="handleCheckChange"
+          <el-switch
+            v-model="dataForm.status"
+            :active-value="1"
+            :inactive-value="0"
+            active-text="启用"
+            inactive-text="禁用"
           />
         </el-form-item>
       </el-form>
@@ -78,18 +87,17 @@
 </template>
 
 <script>
-import { listRole, createRole, updateRole, deleteRole } from '@/api/role'
-import { listPermission } from '@/api/permission'
+import { listPermission, createPermission, updatePermission, deletePermission } from '@/api/permission'
 
 const initDataForm = {
+  pid: 0,
   name: '',
-  description: '',
-  status: true,
-  permissionIds: []
+  value: '',
+  status: 1
 }
 
 export default {
-  name: 'Role',
+  name: 'Permission',
   data() {
     return {
       loading: {
@@ -99,43 +107,26 @@ export default {
       visible: {
         dataForm: false
       },
-      permissionList: [],
       list: [],
       total: 0,
       type: 'create',
       dataForm: { ...initDataForm },
       rules: {
-        name: [{ required: true, message: '请输入角色名称', trigger: 'change' }],
-        description: [{ required: true, message: '请输入角色描述', trigger: 'change' }],
-        status: [{ required: true, message: '请选择角色状态', trigger: 'change' }]
-      },
-      defaultProps: {
-        children: 'children',
-        label: 'name'
-      },
-      checked: []
+        name: [{ required: true, message: '请输入权限名称', trigger: 'change' }],
+        value: [{ required: true, message: '请输入权限值', trigger: 'change' }],
+        status: [{ required: true, message: '请选择权限状态', trigger: 'change' }]
+      }
     }
   },
   created() {
     this.getData()
-    this.getPermissionList()
   },
   methods: {
     async getData() {
       this.loading.table = true
       try {
-        const res = await listRole()
-        this.list = res.data
-      } catch (error) {
-        console.log(error)
-      }
-      this.loading.table = false
-    },
-    async getPermissionList() {
-      this.loading.table = true
-      try {
         const res = await listPermission()
-        this.permissionList = res.data
+        this.list = res.data
       } catch (error) {
         console.log(error)
       }
@@ -145,11 +136,9 @@ export default {
       if (row) {
         this.dataForm = { ...row }
         this.dataForm.status = row.status === 1
-        this.checked = [...row.permissionIds]
         this.type = 'edit'
       } else {
         this.dataForm = { ...initDataForm }
-        this.checked = []
         this.type = 'create'
       }
       this.loading.dataForm = false
@@ -158,22 +147,18 @@ export default {
         this.$refs['dataForm'].clearValidate()
       })
     },
-    handleCheckChange() {
-      const checkedIds = this.$refs.tree.getCheckedKeys()
-      this.dataForm.permissionIds = checkedIds
-    },
     handleSure() {
       this.$refs['dataForm'].validate(async valid => {
-        if (!valid) return this.$message.error('请完善角色信息')
+        if (!valid) return this.$message.error('请完善权限信息')
         this.loading.dataForm = true
         try {
           const req = { ...this.dataForm }
-          req.status = req.status ? 1 : 0
+          req.pid = req.pid || 0
           let res
           if (this.type === 'create') {
-            res = await createRole(req)
+            res = await createPermission(req)
           } else {
-            res = await updateRole(req)
+            res = await updatePermission(req)
           }
           this.$message.success(res.message || 'OK')
           this.visible.dataForm = false
@@ -185,7 +170,7 @@ export default {
       })
     },
     handleStatus(row) {
-      this.$confirm(`确定${row.status === 1 ? '禁用' : '启用'}该角色?`, '提示', {
+      this.$confirm(`确定${row.status === 1 ? '禁用' : '启用'}该权限?`, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -195,7 +180,7 @@ export default {
           try {
             const req = { ...row }
             req.status = row.status === 1 ? 0 : 1
-            const res = await updateRole(req)
+            const res = await updatePermission(req)
             this.$message.success(res.message || 'OK')
             this.getData()
           } catch (error) {
@@ -208,7 +193,10 @@ export default {
         })
     },
     handleDelete(row) {
-      this.$confirm(`确定删除该角色?`, '提示', {
+      if (row.children.length) {
+        return this.$message.error('该权限有子权限，无法删除！')
+      }
+      this.$confirm(`确定删除该权限?`, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -216,7 +204,7 @@ export default {
         .then(async() => {
           this.loading.table = true
           try {
-            const res = await deleteRole(row.id)
+            const res = await deletePermission(row.id)
             this.$message.success(res.message || 'OK')
             this.getData()
           } catch (error) {
@@ -227,6 +215,22 @@ export default {
         .catch(() => {
           console.log('关闭弹窗')
         })
+    },
+    tableRowType(row) {
+      if (row.pid === 0) {
+        return 'primary'
+      } else if (row.children.length) {
+        return 'success'
+      }
+      return 'warning'
+    },
+    tableRowClassName({ row, rowIndex }) {
+      if (row.pid === 0) {
+        return ''
+      } else if (row.children.length) {
+        return 'first-row'
+      }
+      return 'second-row'
     }
   }
 }
@@ -235,5 +239,14 @@ export default {
 <style lang="scss" scope>
 .filter-container {
   margin-bottom: 10px;
+}
+
+.el-table {
+  .first-row {
+    background: #f0f9eb;
+  }
+  .second-row {
+    background: #fdf5e6;
+  }
 }
 </style>

@@ -14,7 +14,7 @@ const logOut = () => {
 // create an axios instance
 const service = axios.create({
   baseURL: config.baseURL, // url = base url + request url
-  timeout: 15000 // request timeout
+  timeout: 15000 // request timeout,
 })
 
 // request interceptor
@@ -55,7 +55,7 @@ service.interceptors.response.use(
     })
 
     // 401 退出登录
-    if (response.status === 401) {
+    if (error.response.status === 401) {
       logOut()
     }
     return Promise.reject(error)

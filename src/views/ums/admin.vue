@@ -1,21 +1,21 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-button type="primary" size="medium" icon="el-icon-plus" @click="handleDialog()">新增用户</el-button>
+      <el-button type="primary" icon="el-icon-plus" @click="handleDialog()">新增用户</el-button>
     </div>
 
     <el-table v-loading="loading.table" :data="list" border fit>
       <el-table-column prop="id" label="ID" align="center" sortable width="100" />
-      <el-table-column label="头像" align="center" sortable min-width="100">
+      <el-table-column label="头像" align="center" min-width="100">
         <template slot-scope="scope">
           <img class="thumb" :src="scope.row.avatar" alt @click="handleDialog(scope.row)" >
         </template>
       </el-table-column>
-      <el-table-column prop="username" label="用户名" align="center" sortable min-width="100" />
-      <el-table-column prop="nickName" label="昵称" align="center" sortable min-width="100" />
-      <el-table-column prop="email" label="邮箱" align="center" sortable min-width="150" />
-      <el-table-column prop="note" label="备注" align="center" sortable min-width="150" />
-      <el-table-column label="角色" align="center" sortable min-width="100">
+      <el-table-column prop="username" label="用户名" align="center" min-width="100" />
+      <el-table-column prop="nickName" label="昵称" align="center" min-width="100" />
+      <el-table-column prop="email" label="邮箱" align="center" min-width="150" />
+      <el-table-column prop="note" label="备注" align="center" min-width="150" />
+      <el-table-column label="角色" align="center" min-width="100">
         <template slot-scope="scope">
           <el-tag
             v-for="item in scope.row.roleIds"
@@ -25,12 +25,12 @@
           >{{ getAdminRole(item) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center" sortable min-width="100">
+      <el-table-column label="状态" align="center" min-width="100">
         <template slot-scope="scope">
           <el-tag :type="scope.row.status === 1 ? 'success' : 'warning'">{{ scope.row.status === 1 ? '启用' : '禁用' }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="createTime" label="创建时间" align="center" sortable min-width="150" />
+      <el-table-column prop="createTime" label="创建时间" align="center" min-width="150" />
       <el-table-column label="操作" align="center" min-width="200px">
         <template slot-scope="scope">
           <el-button
@@ -86,7 +86,13 @@
           </el-select>
         </el-form-item>
         <el-form-item label="状态" prop="status">
-          <el-switch v-model="dataForm.status" active-text="启用" inactive-text="禁用" />
+          <el-switch
+            v-model="dataForm.status"
+            :active-value="1"
+            :inactive-value="0"
+            active-text="启用"
+            inactive-text="禁用"
+          />
         </el-form-item>
         <el-form-item label="备注">
           <el-input v-model="dataForm.note" placeholder="请输入备注" />
@@ -110,10 +116,10 @@
 </template>
 
 <script>
-import { listAdmin, createAdmin, updateAdmin, deleteAdmin } from '@/api/admin'
-import { listRole } from '@/api/role'
 import Pagination from '@/components/Pagination'
 import Upload from '@/components/Upload'
+import { listAdmin, createAdmin, updateAdmin, deleteAdmin } from '@/api/admin'
+import { listRole } from '@/api/role'
 
 const initDataForm = {
   username: '',
@@ -122,7 +128,7 @@ const initDataForm = {
   nickName: '',
   email: '',
   roleIds: [],
-  status: true,
+  status: 1,
   note: '',
   avatar: ''
 }
@@ -143,11 +149,11 @@ export default {
       roleList: [],
       list: [],
       total: 0,
-      type: 'create',
       query: {
         pageNum: 1,
         pageSize: 20
       },
+      type: 'create',
       dataForm: { ...initDataForm },
       rules: {
         username: [{ required: true, message: '请输入用户名', trigger: 'change' }],
@@ -239,7 +245,6 @@ export default {
           this.loading.table = true
           try {
             const req = { ...row }
-            req.status = row.status === 1 ? 0 : 1
             const res = await updateAdmin(req)
             this.$message.success(res.message || 'OK')
             this.getData()
