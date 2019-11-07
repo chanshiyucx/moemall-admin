@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
-    <div class="filter-container">
-      <el-button :disabled="parentId === 0" type="primary" icon="el-icon-arrow-left" @click="goBack">返回上级</el-button>
+    <div :class="['filter-container', parentId === 0 && 'flex-end']">
+      <el-button v-show="parentId !== 0" type="primary" icon="el-icon-arrow-left" @click="goBack">返回上级</el-button>
       <el-button type="primary" icon="el-icon-plus" @click="handleDialog()">新增分类</el-button>
     </div>
 
@@ -41,7 +41,12 @@
       </el-table-column>
       <el-table-column label="操作" align="center" min-width="200px">
         <template slot-scope="scope">
-          <el-button type="primary" size="mini" @click="handleNextLevel(scope.row)">查看下级</el-button>
+          <el-button
+            type="primary"
+            size="mini"
+            :disabled="scope.row.level | disableNextLevel"
+            @click="handleNextLevel(scope.row)"
+          >查看下级</el-button>
           <el-button type="danger" size="mini" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
@@ -135,6 +140,9 @@ export default {
       } else if (value === 1) {
         return '二级'
       }
+    },
+    disableNextLevel(value) {
+      return value !== 0
     }
   },
   data() {
@@ -308,5 +316,8 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
+}
+.flex-end {
+  justify-content: flex-end;
 }
 </style>

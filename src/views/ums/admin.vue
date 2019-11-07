@@ -5,8 +5,8 @@
     </div>
 
     <el-table v-loading="loading.table" :data="list" border fit>
-      <el-table-column prop="id" label="ID" align="center" sortable width="100" />
-      <el-table-column label="头像" align="center" min-width="100">
+      <el-table-column prop="id" label="ID" align="center" sortable width="80" />
+      <el-table-column label="头像" align="center" min-width="80">
         <template slot-scope="scope">
           <img class="thumb" :src="scope.row.avatar" alt @click="handleDialog(scope.row)" >
         </template>
@@ -15,7 +15,7 @@
       <el-table-column prop="nickName" label="昵称" align="center" min-width="100" />
       <el-table-column prop="email" label="邮箱" align="center" min-width="150" />
       <el-table-column prop="note" label="备注" align="center" min-width="150" />
-      <el-table-column label="角色" align="center" min-width="100">
+      <el-table-column label="角色" align="center" min-width="120">
         <template slot-scope="scope">
           <el-tag
             v-for="item in scope.row.roleIds"

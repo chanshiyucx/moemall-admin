@@ -66,11 +66,12 @@ div:focus {
 }
 
 .thumb {
+  cursor: pointer;
   width: 40px;
   height: 40px;
   min-width: 40px;
   min-height: 40px;
   border-radius: 3px;
   background-color: #efefef;
-  cursor: pointer;
+  object-fit: cover;
 }
