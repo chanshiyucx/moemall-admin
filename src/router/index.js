@@ -86,7 +86,7 @@ export const constantRoutes = [
     path: '/pms',
     component: Layout,
     name: 'Pms',
-    meta: { title: '商品管理', icon: 'ums' },
+    meta: { title: '商品管理', icon: 'pms' },
     children: [
       {
         path: 'category',
@@ -99,6 +99,12 @@ export const constantRoutes = [
         name: 'Brand',
         component: () => import('@/views/pms/brand'),
         meta: { title: '品牌管理', icon: 'brand', id: 6 }
+      },
+      {
+        path: 'productAttr',
+        name: 'ProductAttr',
+        component: () => import('@/views/pms/productAttr'),
+        meta: { title: '属性管理', icon: 'productAttr', id: 5 }
       }
     ]
   },
