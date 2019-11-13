@@ -9,7 +9,7 @@
       <el-table-column prop="id" label="ID" align="center" sortable width="100" />
       <el-table-column label="图标" align="center" min-width="100">
         <template slot-scope="scope">
-          <img class="thumb" :src="scope.row.icon" alt @click="handleDialog(scope.row)" >
+          <img class="thumb" :src="scope.row.icon" alt @click="handleDialog(scope.row)" />
         </template>
       </el-table-column>
       <el-table-column prop="name" label="名称" align="center" min-width="100" />
@@ -46,7 +46,8 @@
             size="mini"
             :disabled="scope.row.level | disableNextLevel"
             @click="handleNextLevel(scope.row)"
-          >查看下级</el-button>
+            >查看下级</el-button
+          >
           <el-button type="danger" size="mini" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
@@ -89,6 +90,17 @@
         <el-form-item label="描述">
           <el-input v-model="dataForm.description" type="textarea" placeholder="请输入描述" />
         </el-form-item>
+        <el-form-item
+          v-for="(filterProductAttr, index) in filterProductAttrList"
+          :key="filterProductAttr.key"
+          :label="index === 0 ? '筛选属性' : ''"
+        >
+          <el-cascader v-model="filterProductAttr.value" :props="cascaderProps" :options="filterAttrs" clearable />
+          <el-button style="margin-left: 20px" @click.prevent="removeFilterAttr(filterProductAttr)">删除</el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button size="small" type="primary" @click="handleAddFilterAttr()">新增</el-button>
+        </el-form-item>
         <el-form-item label="是否显示" prop="showStatus">
           <el-switch v-model="dataForm.showStatus" :active-value="1" :inactive-value="0" />
         </el-form-item>
@@ -115,6 +127,7 @@
 
 <script>
 import { listCategory, createCategory, updateCategory, updateCategoryStatus, deleteCategory } from '@/api/category'
+import { listWithAttrAttributeCategory, listAttributeIdList } from '@/api/productAttr'
 import Pagination from '@/components/Pagination'
 import Upload from '@/components/Upload'
 
@@ -127,7 +140,8 @@ const initDataForm = {
   navStatus: 0,
   icon: '',
   keywords: '',
-  description: ''
+  description: '',
+  productAttributeIdList: []
 }
 
 export default {
@@ -162,10 +176,20 @@ export default {
         pageNum: 1,
         pageSize: 20
       },
-      search: {
-      },
+      search: {},
       type: 'create',
       dataForm: { ...initDataForm },
+      filterAttrs: [],
+      filterProductAttrList: [
+        {
+          value: []
+        }
+      ],
+      cascaderProps: {
+        value: 'id',
+        label: 'name',
+        children: 'productAttributeList'
+      },
       rules: {
         name: [{ required: true, message: '请输入名称', trigger: 'change' }],
         productUnit: [{ required: true, message: '请输入单位', trigger: 'change' }],
@@ -186,6 +210,7 @@ export default {
   created() {
     this.resetParentId()
     this.getData()
+    this.getListWithAttrAttributeCategory()
   },
   methods: {
     resetParentId() {
@@ -206,13 +231,30 @@ export default {
       }
       this.loading.table = false
     },
-    handleDialog(row) {
+    async getListWithAttrAttributeCategory() {
+      try {
+        const res = await listWithAttrAttributeCategory()
+        this.filterAttrs = res.data
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    async handleDialog(row) {
       if (row) {
         this.dataForm = { ...row }
         this.type = 'edit'
+        const res = await listAttributeIdList(row.id)
+        if (res.data.length) {
+          this.filterProductAttrList = res.data.map(o => ({
+            value: [o.attributeCategoryId, o.attributeId]
+          }))
+        } else {
+          this.filterProductAttrList = [{ value: [] }]
+        }
       } else {
         this.dataForm = { ...initDataForm }
         this.dataForm.parentId = this.parentId
+        this.filterProductAttrList = [{ value: [] }]
         this.type = 'create'
       }
       this.loading.dataForm = false
@@ -227,6 +269,13 @@ export default {
         this.loading.dataForm = true
         try {
           const req = { ...this.dataForm }
+          const productAttributeIdList = []
+          this.filterProductAttrList.map(o => {
+            if (o.value && o.value.length === 2) {
+              productAttributeIdList.push(o.value[1])
+            }
+          })
+          req.productAttributeIdList = Array.from(new Set(productAttributeIdList))
           let res
           if (this.type === 'create') {
             res = await createCategory(req)
@@ -266,7 +315,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       })
-        .then(async() => {
+        .then(async () => {
           this.loading.table = true
           try {
             const res = await deleteCategory(row.id)
@@ -300,8 +349,36 @@ export default {
       this.$message.error('图片上传失败:' + err.message)
       this.loading.upload = false
     },
+    removeFilterAttr(productAttributeId) {
+      if (this.filterProductAttrList.length === 1) {
+        this.$message({
+          message: '至少要留一个',
+          type: 'warning',
+          duration: 1000
+        })
+        return
+      }
+      const index = this.filterProductAttrList.indexOf(productAttributeId)
+      if (index !== -1) {
+        this.filterProductAttrList.splice(index, 1)
+      }
+    },
+    handleAddFilterAttr() {
+      if (this.filterProductAttrList.length === 3) {
+        this.$message({
+          message: '最多添加三个',
+          type: 'warning',
+          duration: 1000
+        })
+        return
+      }
+      this.filterProductAttrList.push({
+        value: [],
+        key: Date.now()
+      })
+    },
     handleNextLevel(row) {
-      this.$router.push({ path: '/pms/category', query: { parentId: row.id }})
+      this.$router.push({ path: '/pms/category', query: { parentId: row.id } })
     },
     goBack() {
       this.$router.go(-1)

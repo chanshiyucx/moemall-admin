@@ -105,6 +105,13 @@ export const constantRoutes = [
         name: 'ProductAttr',
         component: () => import('@/views/pms/productAttr'),
         meta: { title: '属性管理', icon: 'productAttr', id: 5 }
+      },
+      {
+        path: 'productAttrList',
+        name: 'ProductAttrList',
+        hidden: true,
+        component: () => import('@/views/pms/productAttrList'),
+        meta: { title: '属性管理' }
       }
     ]
   },

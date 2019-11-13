@@ -15,8 +15,8 @@
       <el-table-column prop="paramCount" label="参数数量" align="center" min-width="100" />
       <el-table-column label="操作" align="center" min-width="200px">
         <template slot-scope="scope">
-          <el-button type="primary" size="mini" @click="handleAttrList(scope.row, 'attribute')">属性列表</el-button>
-          <el-button type="primary" size="mini" @click="handleAttrList(scope.row, 'type')">参数列表</el-button>
+          <el-button type="primary" size="mini" @click="handleAttrList(scope.row, 0)">属性列表</el-button>
+          <el-button type="primary" size="mini" @click="handleAttrList(scope.row, 1)">参数列表</el-button>
           <el-button type="danger" size="mini" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
@@ -166,7 +166,9 @@ export default {
           console.log('关闭弹窗')
         })
     },
-    handleAttrList(row, type) {}
+    handleAttrList(row, type) {
+      this.$router.push({ path: '/pms/productAttrList', query: { cid: row.id, cname: row.name, ctype: type }})
+    }
   }
 }
 </script>
